@@ -1,11 +1,37 @@
 {
   "version": 3,
   "targets": {
-    "net7.0": {}
+    "net7.0": {
+      "HidApi.Net/0.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/HidApi.Net.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/HidApi.Net.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "HidApi.Net/0.3.0": {
+      "sha512": "SqW48FsMyBhqyOSKipq9rVu/gdesKcmC0w0MNM/pdx/08yH3o8ZUWjRGpONVVfuTnrlSO/Ct7TuoX24qRuK0nw==",
+      "type": "package",
+      "path": "hidapi.net/0.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "hidapi.net.0.3.0.nupkg.sha512",
+        "hidapi.net.nuspec",
+        "lib/net6.0/HidApi.Net.dll",
+        "readme.md"
+      ]
+    }
+  },
   "projectFileDependencyGroups": {
-    "net7.0": []
+    "net7.0": [
+      "HidApi.Net >= 0.3.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\Mruvka\\.nuget\\packages\\": {}
@@ -45,6 +71,12 @@
     "frameworks": {
       "net7.0": {
         "targetAlias": "net7.0",
+        "dependencies": {
+          "HidApi.Net": {
+            "target": "Package",
+            "version": "[0.3.0, )"
+          }
+        },
         "imports": [
           "net461",
           "net462",

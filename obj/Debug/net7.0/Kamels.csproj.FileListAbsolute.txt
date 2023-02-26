@@ -13,3 +13,5 @@ D:\Mruv\Buhtolin\Kamels\obj\Debug\net7.0\refint\Kamels.dll
 D:\Mruv\Buhtolin\Kamels\obj\Debug\net7.0\Kamels.pdb
 D:\Mruv\Buhtolin\Kamels\obj\Debug\net7.0\Kamels.genruntimeconfig.cache
 D:\Mruv\Buhtolin\Kamels\obj\Debug\net7.0\ref\Kamels.dll
+D:\Mruv\Buhtolin\Kamels\bin\Debug\net7.0\HidApi.Net.dll
+D:\Mruv\Buhtolin\Kamels\obj\Debug\net7.0\Kamels.csproj.CopyComplete
