@@ -31,8 +31,6 @@ class Program
                                         .Distinct()
                                         .ToList();
 
-        devices.ForEach(x => Console.WriteLine(x.Path));
-
         sb.AppendLine("#\tManufacturer\tProduct Desc\tBus\tProduct ID");
 
         for (int i=0; i<devices.Count; i++)
