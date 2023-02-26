@@ -12,16 +12,6 @@ class Program
         Console.Read();
     }
 
-    //static void ListDevices()
-    //{
-    //    List<DeviceInfo> devices = Hid.Enumerate().ToList();
-    //    foreach (var deviceInfo in Hid.Enumerate())
-    //    {
-    //        using var device = deviceInfo.ConnectToDevice();
-    //        Console.WriteLine(device.GetManufacturer());
-    //    }
-    //}
-
     static void ListLogitechHIDDevices()
     {
         StringBuilder sb = new StringBuilder();
