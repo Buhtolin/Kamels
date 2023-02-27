@@ -4,7 +4,8 @@ using System.Text;
 class Program
 {
 
-    const ushort logitechVendorID = 1133;
+    const ushort logiVendorID = 1133;
+    static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), (65347, 514) };
     static void Main()
     {
         Console.WriteLine("Hello, World!");
@@ -17,9 +18,11 @@ class Program
         StringBuilder sb = new StringBuilder();
 
         List<DeviceInfo> devices = Hid.Enumerate()
-                                        .Where(x=>x.VendorId.Equals(logitechVendorID))
-                                        .Distinct()
+                                        .Where(x=>x.VendorId.Equals(logiVendorID) &&
+                                                    Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage))>-1)
                                         .ToList();
+
+        devices.ForEach(x => Console.WriteLine(x));
 
         sb.AppendLine("#\tManufacturer\tProduct Desc\tBus\tProduct ID");
 
