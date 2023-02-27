@@ -22,8 +22,6 @@ class Program
                                                     Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage))>-1)
                                         .ToList();
 
-        devices.ForEach(x => Console.WriteLine(x));
-
         sb.AppendLine("#\tManufacturer\tProduct Desc\tBus\tProduct ID");
 
         for (int i=0; i<devices.Count; i++)
