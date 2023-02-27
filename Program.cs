@@ -5,10 +5,12 @@ class Program
 {
 
     const ushort logiVendorID = 1133;
-    static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), (65347, 514) };
+    static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), //Logibolt
+                                                                                    (65347, 514) //Bluetooth
+                                                                                  };
     static void Main()
     {
-        Console.WriteLine("Hello, World!");
+        Console.WriteLine("Detecting USB dongles and Bluetooth-connected Logitech peripherals ...\r\n");
         ListLogitechHIDDevices();
         Console.Read();
     }
