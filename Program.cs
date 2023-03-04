@@ -130,9 +130,9 @@ class Program
         if (SettingsHolder.syncMode == 0)
         {
             SettingsHolder.syncMode = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please select the switch mode you would like to use:\r\n\r\n" +
-                                                                                    $"1. Mouse follows keyboard\r\n" +
-                                                                                    $"2. Keyboard follows mouse\r\n" +
-                                                                                    $"3. Both\r\n" +
+                                                                                    $"1. Mouse follows keyboard (via sequence-toggle function bound to key press)\r\n" +
+                                                                                    $"2. Keyboard follows mouse (this program needs to run in the background)\r\n" +
+                                                                                    $"3. Either (this program needs to run in the background)\r\n" +
                                                                                     $"\r\n... type in the number of your choice, and press 'Enter': ", 1, SettingsHolder.totalHostDevices);
 
             GenerateSettingsFile();
