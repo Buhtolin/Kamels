@@ -28,6 +28,7 @@ class Program
         DeviceSettingsCheck();
         SequenceSettingsCheck();
         SyncModeSettingCheck();
+        SetupInstructions();
     }
     static void DeviceSettingsCheck()
     {
@@ -120,22 +121,44 @@ class Program
 
     static void SyncModeSettingCheck()
     {
-        setupProgress.step += 1;
-
-        if (!setupProgress.introPrinted)
-        {
-            PrintIntro();
-        };
-
         if (SettingsHolder.syncMode == 0)
         {
+            setupProgress.step += 1;
+
+            if (!setupProgress.introPrinted)
+            {
+                PrintIntro();
+            };
+
             SettingsHolder.syncMode = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please select the switch mode you would like to use:\r\n\r\n" +
-                                                                                    $"1. Mouse follows keyboard (via sequence-toggle function bound to key press)\r\n" +
-                                                                                    $"2. Keyboard follows mouse (this program needs to run in the background)\r\n" +
-                                                                                    $"3. Either (this program needs to run in the background)\r\n" +
+                                                                                    $"\t1. Mouse follows keyboard (via sequence-toggle function bound to key press)\r\n" +
+                                                                                    $"\t2. Keyboard follows mouse (this program needs to run in the background)\r\n" +
+                                                                                    $"\t3. Either (this program needs to run in the background)\r\n" +
                                                                                     $"\r\n... type in the number of your choice, and press 'Enter': ", 1, SettingsHolder.totalHostDevices);
 
             GenerateSettingsFile();
+        };
+    }
+
+    static void SetupInstructions()
+    {
+        if (setupProgress.introPrinted)
+        {
+            Console.ForegroundColor=ConsoleColor.Green;
+            Console.WriteLine($"\r\nINSTRUCTIONS:\r\n");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine($"Set this program up with sync mode {SettingsHolder.syncMode} on all your computers/devices with the correct switch sequence number out of the same total computer/device count.\r\n");
+            switch (SettingsHolder.syncMode)
+            {
+                case 1:
+                    Console.WriteLine("Please map a keyboard key to run this program on press on all your computers/devices. For Windows, you can use Logi Options.\r\n");
+                    break;
+                case >1:
+                    Console.WriteLine( "Please run this program in the background on all your devices.\r\n");
+                    break;
+            };
+            Console.WriteLine("Press any key to finish the setup ...");
+            Console.ReadKey();
         };
     }
 
@@ -258,7 +281,9 @@ class Program
         Console.WriteLine($"KAMELS - Keyboard and Mouse Easy Logitech Switch, version {Assembly.GetExecutingAssembly().GetName().Version}\r\n");
 
         Console.ForegroundColor= ConsoleColor.Gray;
-        Console.WriteLine($"Some setup is necessary to get you going, so please follow the instructions below to get everything ready");
+        Console.WriteLine($"This is a small program to help your multidevice Logitech peripherals in sync.\r\n\r\n" + "" +
+                            "This software is not affiliated in any way with Logitech. Please use at your own risk.\r\n\r\n" +
+                            "Some setup is necessary to get you going, so please follow the instructions below to get everything ready.\r\n");
 
         setupProgress.introPrinted= true;
     }
