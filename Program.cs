@@ -1,7 +1,6 @@
 ﻿using HidApi;
 using System.Text;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 class Program
 {
@@ -15,7 +14,7 @@ class Program
         public static ushort mouseDevice { get; set; }
         public static ushort totalHostDevices { get; set; }
         public static ushort hostDeviceSequenceNumber { get; set; }
-        public static ushort mouseMode { get; set; }
+        public static ushort syncMode { get; set; }
     }
 
     static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), //Logibolt
@@ -26,21 +25,42 @@ class Program
     static void Main()
     {
         ParseSettings();
-        MouseDeviceCheck();
+        DeviceSettingsCheck();
+        SequenceSettingsCheck();
+        SyncModeSettingCheck();
     }
-    static void MouseDeviceCheck()
+    static void DeviceSettingsCheck()
     {
-        if(SettingsHolder.mouseDevice==0)
-        {
+        DeviceCheck(typeof(SettingsHolder).GetProperty("mouseDevice"));
+        DeviceCheck(typeof(SettingsHolder).GetProperty("keyboardDevice"));
+    }
+    static void DeviceCheck(PropertyInfo? property)
+    {
+        if (property == null) return;
 
-            setupProgress.step = +1;
+        object? value = property.GetValue(null);
+
+        if(value is null) return;
+
+        ushort propertyValue = (ushort)value;
+
+        string deviceTypeIdentifier = property.Name;
+
+        if (deviceTypeIdentifier.Split('D').Length > 0)
+        {
+            deviceTypeIdentifier = deviceTypeIdentifier.Split('D')[0].ToUpperInvariant();
+        };
+
+        if (propertyValue==0)
+        {
+            setupProgress.step += 1;
 
             if (!setupProgress.introPrinted)
             {
                 PrintIntro();
             };
 
-            Console.WriteLine($"{setupProgress.step}. Please select the interface your mouse is connected to:\r\n");
+            Console.WriteLine($"\r\n{setupProgress.step}. Please select the interface your {deviceTypeIdentifier} is connected to:\r\n");
 
             List<DeviceInfo> devicesHolder = ListLogitechHIDDeviceControllers();
 
@@ -48,12 +68,13 @@ class Program
             {
                 case 1:
 
-                    SettingsHolder.mouseDevice = devicesHolder[0].ProductId;
+                    property.SetValue(null, devicesHolder[0].ProductId);
                     break;
 
                 case >1:
 
-                    SettingsHolder.mouseDevice = devicesHolder[RequestNumberEntry(devicesHolder.Count)-1].ProductId;
+                    int deviceNumber = RequestNumberEntry($"Please type a number (1-{devicesHolder.Count}) and press 'Enter': ", 1, devicesHolder.Count) - 1;
+                    property.SetValue(null, devicesHolder[deviceNumber].ProductId);
                     break;
 
                 default:
@@ -66,21 +87,73 @@ class Program
         };
     }
 
-    static int RequestNumberEntry(int optionsCount)
+    static void SequenceSettingsCheck()
+    {
+        if (SettingsHolder.totalHostDevices == 0)
+        {
+            setupProgress.step += 1;
+
+            if (!setupProgress.introPrinted)
+            {
+                PrintIntro();
+            };
+
+            SettingsHolder.totalHostDevices = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please type the number of devices/computers you will switch between and press 'Enter': ", 2, 4);
+
+            GenerateSettingsFile();
+        }
+
+        if (SettingsHolder.hostDeviceSequenceNumber == 0)
+        {
+            setupProgress.step += 1;
+
+            if (!setupProgress.introPrinted)
+            {
+                PrintIntro();
+            };
+
+            SettingsHolder.hostDeviceSequenceNumber = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please type the sequence number of THIS device in your switch sequence of {SettingsHolder.totalHostDevices} devices/computers and press 'Enter': ", 1, SettingsHolder.totalHostDevices);
+
+            GenerateSettingsFile();
+        }
+    }
+
+    static void SyncModeSettingCheck()
+    {
+        setupProgress.step += 1;
+
+        if (!setupProgress.introPrinted)
+        {
+            PrintIntro();
+        };
+
+        if (SettingsHolder.syncMode == 0)
+        {
+            SettingsHolder.syncMode = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please select the switch mode you would like to use:\r\n\r\n" +
+                                                                                    $"1. Mouse follows keyboard\r\n" +
+                                                                                    $"2. Keyboard follows mouse\r\n" +
+                                                                                    $"3. Both\r\n" +
+                                                                                    $"\r\n... type in the number of your choice, and press 'Enter': ", 1, SettingsHolder.totalHostDevices);
+
+            GenerateSettingsFile();
+        };
+    }
+
+    static int RequestNumberEntry(string promptText, int lowerBound = 1, int upperBound = 2)
     {
         int selection;
 
-        Console.Write($"\r\nPlease type a number (1-{optionsCount}) and press 'Enter': ");
+        Console.Write($"\r\n{promptText}");
 
         int.TryParse(Console.ReadLine(), out selection);
 
-        if(selection>=1 && selection <= optionsCount)
+        if(lowerBound>=1 && selection <= upperBound)
         {
             return selection;
         }
         else
         {
-            return RequestNumberEntry(optionsCount);
+            return RequestNumberEntry(promptText, lowerBound, upperBound);
         };
     }
     static bool ParseSettings()
@@ -150,7 +223,7 @@ class Program
                                                     Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage))>-1)
                                         .ToList();
 
-        sb.AppendLine("#\tManufacturer\tProduct Description\tConnection Bus\tProduct ID");
+        sb.AppendLine("#\tManufacturer\tProduct Description\tBus\tProduct ID");
 
         for (int i=0; i<devices.Count; i++)
         {
@@ -185,7 +258,7 @@ class Program
         Console.WriteLine($"KAMELS - Keyboard and Mouse Easy Logitech Switch, version {Assembly.GetExecutingAssembly().GetName().Version}\r\n");
 
         Console.ForegroundColor= ConsoleColor.Gray;
-        Console.WriteLine($"Some setup is necessary to get you going, so please follow the instructions below to get everything ready.\r\n");
+        Console.WriteLine($"Some setup is necessary to get you going, so please follow the instructions below to get everything ready");
 
         setupProgress.introPrinted= true;
     }
