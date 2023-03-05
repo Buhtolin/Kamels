@@ -225,12 +225,8 @@ class Program
             return RequestNumberEntry(promptText, lowerBound, upperBound);
         };
     }
-    static bool ParseSettings()
+    static void ParseSettings()
     {
-        bool result = false;
-
-        string settingsPath = Path.Combine(Directory.GetCurrentDirectory(), "settings");
-
         if (!File.Exists(settingsPath))
         {
             GenerateSettingsFile();
@@ -264,8 +260,6 @@ class Program
                 };
             };
         };
-
-        return result;
     }
     static void GenerateSettingsFile()
     {
