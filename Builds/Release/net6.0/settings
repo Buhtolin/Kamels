@@ -2,6 +2,6 @@
 
 keyboardDevice=50504
 mouseDevice=50504
-totalHostDevices=0
-hostDeviceSequenceNumber=0
-syncMode=0
+totalHostDevices=2
+hostDeviceSequenceNumber=1
+syncMode=1

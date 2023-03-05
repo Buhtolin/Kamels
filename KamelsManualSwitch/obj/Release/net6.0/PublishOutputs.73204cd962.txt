@@ -1,0 +1,7 @@
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\hidapi.dll
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsManualSwitch.exe
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsManualSwitch.dll
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsManualSwitch.deps.json
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsManualSwitch.runtimeconfig.json
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsManualSwitch.pdb
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\HidApi.Net.dll

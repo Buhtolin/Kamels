@@ -1,0 +1,17 @@
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsConfig.exe
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\hidapi.dll
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsConfig.deps.json
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsConfig.runtimeconfig.json
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsConfig.dll
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsConfig.pdb
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.csproj.AssemblyReference.cache
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.GeneratedMSBuildEditorConfig.editorconfig
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.AssemblyInfoInputs.cache
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.AssemblyInfo.cs
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.csproj.CoreCompileInputs.cache
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.csproj.CopyComplete
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.dll
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\refint\KamelsConfig.dll
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.pdb
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\KamelsConfig.genruntimeconfig.cache
+D:\Mruv\Buhtolin\Kamels\KamelsConfig\obj\Debug\net6.0\ref\KamelsConfig.dll

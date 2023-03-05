@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj": {}
+    "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj": {}
   },
   "projects": {
-    "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj": {
+    "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
+        "projectUniqueName": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
         "projectName": "KamelsManualSwitch",
-        "projectPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
+        "projectPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
         "packagesPath": "C:\\Users\\Mruvka\\.nuget\\packages\\",
-        "outputPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\obj\\",
+        "outputPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Mruvka\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -39,6 +39,12 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "HidApi.Net": {
+              "target": "Package",
+              "version": "[0.3.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",

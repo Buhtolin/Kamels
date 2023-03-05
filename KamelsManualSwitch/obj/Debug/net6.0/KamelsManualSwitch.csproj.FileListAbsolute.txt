@@ -1,0 +1,17 @@
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsManualSwitch.exe
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\hidapi.dll
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsManualSwitch.deps.json
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsManualSwitch.runtimeconfig.json
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsManualSwitch.dll
+D:\Mruv\Buhtolin\Kamels\Builds\Debug\net6.0\KamelsManualSwitch.pdb
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.csproj.AssemblyReference.cache
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.GeneratedMSBuildEditorConfig.editorconfig
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.AssemblyInfoInputs.cache
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.AssemblyInfo.cs
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.csproj.CoreCompileInputs.cache
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.csproj.CopyComplete
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.dll
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\refint\KamelsManualSwitch.dll
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.pdb
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.genruntimeconfig.cache
+D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\ref\KamelsManualSwitch.dll

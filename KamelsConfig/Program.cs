@@ -216,7 +216,7 @@ class Program
 
         int.TryParse(Console.ReadLine(), out selection);
 
-        if(lowerBound>=1 && selection <= upperBound)
+        if(selection>=lowerBound && selection <= upperBound)
         {
             return selection;
         }

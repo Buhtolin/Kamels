@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "7+SsiLaY3SPCaO0HQL9TMvmMVQjGdexKzY69ZGRhJAGdDiwCl+KDFNpfHwdSr5ayuzAaGNqaej1WbDWsyjtK3A==",
+  "dgSpecHash": "7jII+/UEz5PoJ71x1CjvowK006g/+1yijB1iWcrx8YtzFDEM7cnVfL2oXh0mH413z/ENBxDQlmEOtaKCWrDLYQ==",
   "success": true,
-  "projectFilePath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Mruvka\\.nuget\\packages\\hidapi.net\\0.3.0\\hidapi.net.0.3.0.nupkg.sha512"
+  ],
   "logs": []
 }

@@ -6,12 +6,12 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "Kamels/1.0.0": {
+      "KamelsManualSwitch/1.0.0": {
         "dependencies": {
           "HidApi.Net": "0.3.0"
         },
         "runtime": {
-          "Kamels.dll": {}
+          "KamelsManualSwitch.dll": {}
         }
       },
       "HidApi.Net/0.3.0": {
@@ -25,7 +25,7 @@
     }
   },
   "libraries": {
-    "Kamels/1.0.0": {
+    "KamelsManualSwitch/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

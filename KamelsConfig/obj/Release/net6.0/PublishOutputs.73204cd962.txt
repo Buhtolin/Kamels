@@ -1,0 +1,7 @@
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\hidapi.dll
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.exe
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.dll
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.deps.json
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.runtimeconfig.json
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.pdb
+D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\HidApi.Net.dll

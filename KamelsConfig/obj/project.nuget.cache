@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Tyb9DtUKY51WE8XavD2n6gexRYYx/Y35eOD0qNGJ5Y1Ui3TBdVb+q0ObGS9EAQKWnGMRT8LUj3bFM3SyRO4uKQ==",
+  "dgSpecHash": "BKYckbO9Wl5+JyBa6+qWdws1tWQMcdWeNROj4DilfdrukUvc7NffJwDPTRw0nYLPWUjj1Rr28ELm4ug4HEp8HQ==",
   "success": true,
-  "projectFilePath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsConfig\\KamelsConfig.csproj",
+  "projectFilePath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\KamelsConfig.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Mruvka\\.nuget\\packages\\hidapi.net\\0.3.0\\hidapi.net.0.3.0.nupkg.sha512"
   ],
