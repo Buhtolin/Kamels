@@ -29,6 +29,52 @@ class Program
         SequenceSettingsCheck();
         SyncModeSettingCheck();
         SetupInstructions();
+        InitiateSwitch();
+    }
+
+    static void InitiateSwitch()
+    {
+        if (SettingsHolder.syncMode == 1)
+        {
+            if (!setupProgress.introPrinted)
+            {
+                SingleRunSwitch();
+            };
+        };
+    }
+
+    static void SingleRunSwitch()
+    {
+
+        DeviceInfo mouseInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
+                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                        .First();
+
+        DeviceInfo keyboardInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
+                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                        .First();
+
+        if (mouseInfo is null || keyboardInfo is null) return;
+
+        int nextDeviceNumber = SettingsHolder.hostDeviceSequenceNumber.Equals(SettingsHolder.totalHostDevices) ? 0 : SettingsHolder.hostDeviceSequenceNumber;
+
+        byte[] mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber))
+                                    .Concat(new byte[] { 0x00, 0x00 }).ToArray();
+
+        byte[] keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber))
+                                    .Concat(new byte[] { 0x00, 0x00 }).ToArray();
+
+        using (Device deviceLink = mouseInfo.ConnectToDevice())
+        {
+            deviceLink.Write(mouseSwitchCommand);
+        };
+
+        using (Device deviceLink = keyboardInfo.ConnectToDevice())
+        {
+            deviceLink.Write(keyboardSwitchCommand);
+        };
     }
     static void DeviceSettingsCheck()
     {
@@ -241,10 +287,9 @@ class Program
     {
         StringBuilder sb = new StringBuilder();
 
-        List<DeviceInfo> devices = Hid.Enumerate()
-                                        .Where(x=>x.VendorId.Equals(logiVendorID) &&
-                                                    Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage))>-1)
-                                        .ToList();
+        List<DeviceInfo> devices = Hid.Enumerate(logiVendorID)
+                                    .Where(x=>Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage))>-1)
+                                    .ToList();
 
         sb.AppendLine("#\tManufacturer\tProduct Description\tBus\tProduct ID");
 
