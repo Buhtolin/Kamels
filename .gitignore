@@ -1,9 +1,0 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
-/bin/Debug/net7.0
-/.gitignore
-/.gitignore
-/bin/Release/net6.0/settings
