@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/Kamels/FileContentIndex
+/.vs/Kamels/v17/.futdcache.v2
+/.vs/Kamels/v17/.suo
