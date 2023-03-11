@@ -153,7 +153,10 @@ class Program
                                     SendCommand(keyboardSwitchCommand, keyboardDevice);
                                 };
                             }
-                            catch { };
+                            catch
+                            {
+                                Debug.WriteLine(1);
+                            };
                         };
                         connected = false;
                     };
@@ -212,7 +215,10 @@ class Program
                                     SendCommand(mouseSwitchCommand, mouseDevice);
                                 };
                             }
-                            catch { };
+                            catch
+                            {
+                                Debug.WriteLine(1);
+                            };
                         };
                         connected = false;
                     };
