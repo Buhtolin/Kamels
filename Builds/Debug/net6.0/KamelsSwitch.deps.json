@@ -6,12 +6,13 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "KamelsManualSwitch/1.0.0": {
+      "KamelsSwitch/1.0.0": {
         "dependencies": {
-          "HidApi.Net": "0.3.0"
+          "HidApi.Net": "0.3.0",
+          "KamelsConfig": "1.0.0"
         },
         "runtime": {
-          "KamelsManualSwitch.dll": {}
+          "KamelsSwitch.dll": {}
         }
       },
       "HidApi.Net/0.3.0": {
@@ -21,11 +22,19 @@
             "fileVersion": "0.3.0.0"
           }
         }
+      },
+      "KamelsConfig/1.0.0": {
+        "dependencies": {
+          "HidApi.Net": "0.3.0"
+        },
+        "runtime": {
+          "KamelsConfig.dll": {}
+        }
       }
     }
   },
   "libraries": {
-    "KamelsManualSwitch/1.0.0": {
+    "KamelsSwitch/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -36,6 +45,11 @@
       "sha512": "sha512-SqW48FsMyBhqyOSKipq9rVu/gdesKcmC0w0MNM/pdx/08yH3o8ZUWjRGpONVVfuTnrlSO/Ct7TuoX24qRuK0nw==",
       "path": "hidapi.net/0.3.0",
       "hashPath": "hidapi.net.0.3.0.nupkg.sha512"
+    },
+    "KamelsConfig/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
     }
   }
 }

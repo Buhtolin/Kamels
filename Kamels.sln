@@ -5,7 +5,7 @@ VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KamelsConfig", "KamelsConfig\KamelsConfig.csproj", "{2F1BD251-6BA1-4D46-BBE9-26E0470D6B56}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KamelsManualSwitch", "KamelsManualSwitch\KamelsManualSwitch.csproj", "{5E5C06E1-8580-4B82-B2F4-63D1F77A5DC7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KamelsSwitch", "KamelsManualSwitch\KamelsSwitch.csproj", "{5E5C06E1-8580-4B82-B2F4-63D1F77A5DC7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

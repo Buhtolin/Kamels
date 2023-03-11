@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,6 +10,10 @@
 
   <ItemGroup>
     <PackageReference Include="HidApi.Net" Version="0.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\KamelsConfig\KamelsConfig.csproj" />
   </ItemGroup>
 
   <ItemGroup>

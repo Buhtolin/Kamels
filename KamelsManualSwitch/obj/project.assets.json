@@ -10,6 +10,19 @@
         "runtime": {
           "lib/net6.0/HidApi.Net.dll": {}
         }
+      },
+      "KamelsConfig/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "dependencies": {
+          "HidApi.Net": "0.3.0"
+        },
+        "compile": {
+          "bin/placeholder/KamelsConfig.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/KamelsConfig.dll": {}
+        }
       }
     }
   },
@@ -26,11 +39,17 @@
         "lib/net6.0/HidApi.Net.dll",
         "readme.md"
       ]
+    },
+    "KamelsConfig/1.0.0": {
+      "type": "project",
+      "path": "../KamelsConfig/KamelsConfig.csproj",
+      "msbuildProject": "../KamelsConfig/KamelsConfig.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "HidApi.Net >= 0.3.0"
+      "HidApi.Net >= 0.3.0",
+      "KamelsConfig >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -39,11 +58,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
-      "projectName": "KamelsManualSwitch",
-      "projectPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\KamelsManualSwitch.csproj",
+      "projectUniqueName": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsSwitch.csproj",
+      "projectName": "KamelsSwitch",
+      "projectPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\KamelsSwitch.csproj",
       "packagesPath": "C:\\Users\\Mruvka\\.nuget\\packages\\",
-      "outputPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsManualSwitch\\obj\\",
+      "outputPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsManualSwitch\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Mruvka\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -59,7 +78,11 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\KamelsConfig.csproj": {
+              "projectPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\KamelsConfig.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

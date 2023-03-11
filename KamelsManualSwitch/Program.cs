@@ -1,145 +1,244 @@
 ﻿using HidApi;
-using System.Diagnostics;
-using System.Net.NetworkInformation;
 using System.Reflection;
+using KamelsConfig;
+using System.Diagnostics;
 
 class Program
 {
-
-    const ushort logiVendorID = 1133;
-
-    static readonly string settingsPath = Path.Combine(Directory.GetCurrentDirectory(), "settings");
-    static class SettingsHolder
-    {
-        public static ushort keyboardDevice { get; set; }
-        public static ushort mouseDevice { get; set; }
-        public static ushort totalHostDevices { get; set; }
-        public static ushort hostDeviceSequenceNumber { get; set; }
-        public static ushort syncMode { get; set; }
-    }
-
-    static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), //Logibolt
-                                                                                    (65347, 514) //Bluetooth
-                                                                                  };
+    static DeviceInfo? mouseDeviceInfo { get; set; }
+    static DeviceInfo? keyboardDeviceInfo { get; set; }
+    static byte[]? mouseSwitchCommand { get; set; }
+    static byte[]? keyboardSwitchCommand { get; set; }
+    static int nextDeviceNumber { get; set; }
     static void Main()
     {
-        ParseSettings();
-        using (StreamWriter help = new StreamWriter(new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "errors.txt"), FileMode.OpenOrCreate)))
+        Config.ParseSettings();
+
+        if (Config.SettingsHolder.SetupNeededCheck())
         {
-            try
-            {
-                help.WriteLine($"Attempt: {DateTime.Now.ToString("s")}");
+            StartConfigTool();
+            return;
+        };
+
+        Hid.Init();
+
+        LoadSettings();
+
+        switch (Config.SettingsHolder.syncMode)
+        {
+            case 1:
                 ManualSwitch();
-            }
-            catch (Exception ex)
-            {
-                help.WriteLine(ex.ToString());
-            }
+                break;
+
+            case 2:
+                Task KeyboardWorker = Task.Run(ListenerWorkerKeyboard);
+                KeyboardWorker.Wait();
+                break;
+
+            case 3:
+                Task MouseWorker = Task.Run(ListenerWorkerMouse);
+                MouseWorker.Wait();
+                break;
+
+            case 4:
+                Task MouseCoworker = Task.Run(ListenerWorkerMouse);
+                Task KeyboardCoworker = Task.Run(ListenerWorkerKeyboard);
+                //MouseCoworker.Wait();
+                KeyboardCoworker.Wait();
+                break;
+        };
+
+        Hid.Exit();
+
+    }
+
+    static void LoadSettings()
+    {
+        mouseDeviceInfo = Hid.Enumerate(Config.logiVendorID, Config.SettingsHolder.mouseDevice)
+                                .Where(x => Array.IndexOf(Config.logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                                .First();
+
+        keyboardDeviceInfo = Hid.Enumerate(Config.logiVendorID, Config.SettingsHolder.keyboardDevice)
+                                .Where(x => Array.IndexOf(Config.logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                                .First();
+
+        if (mouseDeviceInfo is null || keyboardDeviceInfo is null) return;
+
+        nextDeviceNumber = Config.SettingsHolder.hostDeviceSequenceNumber.Equals(Config.SettingsHolder.totalHostDevices) ? 0 : Config.SettingsHolder.hostDeviceSequenceNumber;
+
+        if (mouseDeviceInfo.BusType.Equals(BusType.Usb))
+        {
+            mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
         }
+        else
+        {
+            mouseSwitchCommand = (new byte[] { 0x11, 0x00, 0x0a, 0x1e })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
+        };
+
+        if (keyboardDeviceInfo.BusType.Equals(BusType.Usb))
+        {
+            keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
+        }
+        else
+        {
+            keyboardSwitchCommand = (new byte[] { 0x11, 0x00, 0x09, 0x1e })
+                                    .Concat(BitConverter.GetBytes(nextDeviceNumber))
+                                    .ToArray();
+        };
     }
 
     static void ManualSwitch()
     {
-        Hid.Init();
-
-        //for (int i = 0; i < 6; i++)
-        //{
-        //    try
-        //    {
-                DeviceInfo mouseInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
-                                .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                .First();
-
-                DeviceInfo keyboardInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
-                                .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                                .First();
-
-                if (mouseInfo is null || keyboardInfo is null) return;
-
-                int nextDeviceNumber = SettingsHolder.hostDeviceSequenceNumber.Equals(SettingsHolder.totalHostDevices) ? 0 : SettingsHolder.hostDeviceSequenceNumber;
-
-                byte[] mouseSwitchCommand;
-
-                byte[] keyboardSwitchCommand;
-
-                if (mouseInfo.BusType.Equals(BusType.Usb))
-                {
-                    mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
-                                            .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
-                }
-                else
-                {
-                    mouseSwitchCommand = (new byte[] { 0x11, 0x00, 0x0a, 0x1e })
-                                            .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
-                };
-
-                if (keyboardInfo.BusType.Equals(BusType.Usb))
-                {
-                    keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
-                                            .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                            .Concat(new byte[] { 0x00, 0x00 }).ToArray();
-                }
-                else
-                {
-                    keyboardSwitchCommand = (new byte[] { 0x11, 0x00, 0x09, 0x1e })
-                                            .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                            .Concat(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })
-                                            .ToArray();
-                };
-
-                SwitchDevice(mouseSwitchCommand, mouseInfo);
-
-                SwitchDevice(keyboardSwitchCommand, keyboardInfo);
-        //    }
-        //    catch
-        //    {
-        //        Thread.Sleep(1000);
-        //        continue;
-        //    };
-        //};
-
-        Hid.Exit();
-    }
-    static void ParseSettings()
-    {
-
-        string[] fileContents = File.ReadAllText(settingsPath).Split("\r\n").Where(x => x.Contains('=')).ToArray();
-
-        if (fileContents.Length > 0)
+        if(mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
         {
-            Dictionary<string, string> paramLines = fileContents.Select(x => x.Split("=")).ToDictionary(y => y[0].Trim(), y => y[1].Trim());
-
-            if (paramLines is not null)
+            using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+            using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
             {
-                foreach (PropertyInfo property in typeof(SettingsHolder).GetProperties())
+                SendCommand(mouseSwitchCommand, mouseDevice);
+                SendCommand(keyboardSwitchCommand, keyboardDevice);
+            };
+        };
+    }
+
+    static void ListenerWorkerMouse()
+    {
+        if(mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            if (mouseDeviceInfo.BusType.Equals(BusType.Usb))
+            {
+                byte[] mouseSwitchOff = { 0x10, 0x02, 0x41, 0x10, 0x42, 0x30, 0xB0 };
+
+                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
                 {
-                    if (paramLines.ContainsKey(property.Name))
+                    while (true)
                     {
-                        if (property.PropertyType == typeof(ushort))
+                        ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
+                        if (readResult.SequenceEqual(mouseSwitchOff))
                         {
-                            ushort conversion;
-                            if (ushort.TryParse(paramLines[property.Name], out conversion))
-                            {
-                                property.SetValue(null, conversion);
-                            };
-                        }
-                        else
-                        {
-                            property.SetValue(null, paramLines[property.Name]);
+                            SendCommand(keyboardSwitchCommand, keyboardDevice);
                         };
+                    };
+                };
+            };
+
+            if (mouseDeviceInfo.BusType.Equals(BusType.Bluetooth))
+            {
+                bool connected = true;
+                //byte[] mouseSwitchOn = { 0x10, 0x02, 0x41, 0x10, 0x02, 0x30, 0xB0 };
+                while (true)
+                {
+                    try
+                    {
+                        using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                        {
+                            if (!connected)
+                            {
+                                connected = true;
+                            };
+                            ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
+                        };
+                    }
+                    catch
+                    {
+                        if (connected)
+                        {
+                            try
+                            {
+                                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                                {
+                                    SendCommand(keyboardSwitchCommand, keyboardDevice);
+                                };
+                            }
+                            catch { };
+                        };
+                        connected = false;
                     };
                 };
             };
         };
     }
 
-    static void SwitchDevice(byte[] command, DeviceInfo deviceInfo)
+    static void ListenerWorkerKeyboard()
     {
-        using (Device? deviceLink = deviceInfo.ConnectToDevice())
+        if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
         {
-            deviceLink?.Write(command);
+            if (keyboardDeviceInfo.BusType.Equals(BusType.Usb))
+            {
+                byte[] keyboardSwitchOff = { 0x10, 0x01, 0x41, 0x10, 0x41, 0x65, 0xB3 };
 
-            ReadOnlySpan<byte> buffer = deviceLink is not null ? deviceLink.ReadTimeout(7, 200) : ReadOnlySpan<byte>.Empty;
+                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                {
+                    while (true)
+                    {
+                        ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
+                        if (readResult.SequenceEqual(keyboardSwitchOff))
+                        {
+                            SendCommand(mouseSwitchCommand, mouseDevice);
+                        };
+                    };
+                };
+            };
+
+            if (keyboardDeviceInfo.BusType.Equals(BusType.Bluetooth))
+            {
+                bool connected = true;
+                //byte[] mouseSwitchOn = { 0x10, 0x02, 0x41, 0x10, 0x02, 0x30, 0xB0 };
+                while (true)
+                {
+                    try
+                    {
+                        using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                        {
+                            if (!connected)
+                            {
+                                connected = true;
+                            };
+                            ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
+                        };
+                    }
+                    catch
+                    {
+                        if (connected)
+                        {
+                            try
+                            {
+                                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                                {
+                                    SendCommand(mouseSwitchCommand, mouseDevice);
+                                };
+                            }
+                            catch { };
+                        };
+                        connected = false;
+                    };
+                };
+            };
         };
+    }
+
+    static void SendCommand(byte[]? command, Device? deviceInput)
+    {
+        if (deviceInput is null)
+        {
+            return;
+        }
+        else
+        {
+            deviceInput.Write(command);
+            deviceInput.ReadTimeout(7, 200);
+        };
+    }
+
+    static void StartConfigTool()
+    {
+        ProcessStartInfo procStartInfo = new ProcessStartInfo();
+        procStartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+        procStartInfo.FileName = "KamelsConfig.exe";
+        Process.Start(procStartInfo);
     }
 }

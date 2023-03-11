@@ -15,3 +15,6 @@ D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\refint\KamelsManualS
 D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.pdb
 D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\KamelsManualSwitch.genruntimeconfig.cache
 D:\Mruv\Buhtolin\Kamels\KamelsManualSwitch\obj\Debug\net6.0\ref\KamelsManualSwitch.dll
+D:\Mruv\Buhtolin\kamels\Builds\Debug\net6.0\KamelsConfig.deps.json
+D:\Mruv\Buhtolin\kamels\Builds\Debug\net6.0\KamelsConfig.runtimeconfig.json
+D:\Mruv\Buhtolin\kamels\Builds\Debug\net6.0\KamelsConfig.exe

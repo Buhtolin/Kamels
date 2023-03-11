@@ -12,10 +12,4 @@
     <PackageReference Include="HidApi.Net" Version="0.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="hidapi.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
