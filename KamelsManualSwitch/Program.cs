@@ -1,5 +1,6 @@
 ﻿using HidApi;
-using System.Text;
+using System.Diagnostics;
+using System.Net.NetworkInformation;
 using System.Reflection;
 
 class Program
@@ -23,62 +24,81 @@ class Program
     static void Main()
     {
         ParseSettings();
-        ManualSwitch();
+        using (StreamWriter help = new StreamWriter(new FileStream(Path.Combine(Directory.GetCurrentDirectory(), "errors.txt"), FileMode.OpenOrCreate)))
+        {
+            try
+            {
+                help.WriteLine($"Attempt: {DateTime.Now.ToString("s")}");
+                ManualSwitch();
+            }
+            catch (Exception ex)
+            {
+                help.WriteLine(ex.ToString());
+            }
+        }
     }
 
     static void ManualSwitch()
     {
+        Hid.Init();
 
-        DeviceInfo mouseInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
-                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-        .First();
+        //for (int i = 0; i < 6; i++)
+        //{
+        //    try
+        //    {
+                DeviceInfo mouseInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
+                                .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                .First();
 
-        DeviceInfo keyboardInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
-                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                        .First();
+                DeviceInfo keyboardInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
+                                .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                                .First();
 
-        if (mouseInfo is null || keyboardInfo is null) return;
+                if (mouseInfo is null || keyboardInfo is null) return;
 
-        int nextDeviceNumber = SettingsHolder.hostDeviceSequenceNumber.Equals(SettingsHolder.totalHostDevices) ? 0 : SettingsHolder.hostDeviceSequenceNumber;
+                int nextDeviceNumber = SettingsHolder.hostDeviceSequenceNumber.Equals(SettingsHolder.totalHostDevices) ? 0 : SettingsHolder.hostDeviceSequenceNumber;
 
-        byte[] mouseSwitchCommand;
+                byte[] mouseSwitchCommand;
 
-        byte[] keyboardSwitchCommand;
+                byte[] keyboardSwitchCommand;
 
-        if (mouseInfo.BusType.Equals(BusType.Usb))
-        {
-            mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
-                                    .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
-        }
-        else
-        {
-            mouseSwitchCommand = (new byte[] { 0x11, 0x00, 0x0a, 0x1e})
-                                    .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
-        };
+                if (mouseInfo.BusType.Equals(BusType.Usb))
+                {
+                    mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
+                                            .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
+                }
+                else
+                {
+                    mouseSwitchCommand = (new byte[] { 0x11, 0x00, 0x0a, 0x1e })
+                                            .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
+                };
 
-        if (keyboardInfo.BusType.Equals(BusType.Usb))
-        {
-            keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
-                                    .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                    .Concat(new byte[] {0x00, 0x00}).ToArray();
-        }
-        else
-        {
-            keyboardSwitchCommand = (new byte[] { 0x11, 0x00, 0x09, 0x1e })
-                                    .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                    .Concat(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })
-                                    .ToArray();
-        };
+                if (keyboardInfo.BusType.Equals(BusType.Usb))
+                {
+                    keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
+                                            .Concat(BitConverter.GetBytes(nextDeviceNumber))
+                                            .Concat(new byte[] { 0x00, 0x00 }).ToArray();
+                }
+                else
+                {
+                    keyboardSwitchCommand = (new byte[] { 0x11, 0x00, 0x09, 0x1e })
+                                            .Concat(BitConverter.GetBytes(nextDeviceNumber))
+                                            .Concat(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })
+                                            .ToArray();
+                };
 
-        using (Device deviceLink = mouseInfo.ConnectToDevice())
-        {
-            deviceLink.Write(mouseSwitchCommand);
-        };
+                SwitchDevice(mouseSwitchCommand, mouseInfo);
 
-        using (Device deviceLink = keyboardInfo.ConnectToDevice())
-        {
-            deviceLink.Write(keyboardSwitchCommand);
-        };
+                SwitchDevice(keyboardSwitchCommand, keyboardInfo);
+        //    }
+        //    catch
+        //    {
+        //        Thread.Sleep(1000);
+        //        continue;
+        //    };
+        //};
+
+        Hid.Exit();
     }
     static void ParseSettings()
     {
@@ -110,6 +130,16 @@ class Program
                     };
                 };
             };
+        };
+    }
+
+    static void SwitchDevice(byte[] command, DeviceInfo deviceInfo)
+    {
+        using (Device? deviceLink = deviceInfo.ConnectToDevice())
+        {
+            deviceLink?.Write(command);
+
+            ReadOnlySpan<byte> buffer = deviceLink is not null ? deviceLink.ReadTimeout(7, 200) : ReadOnlySpan<byte>.Empty;
         };
     }
 }
