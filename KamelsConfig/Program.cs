@@ -14,14 +14,15 @@ namespace KamelsConfig
             public static ushort totalHostDevices { get; set; }
             public static ushort hostDeviceSequenceNumber { get; set; }
             public static ushort syncMode { get; set; }
-
+            public static SwitchSpeed switchSpeedRate { get; set; }
             public static bool SetupNeededCheck()
             {
                 return !(keyboardDevice > 0 &&
                             mouseDevice > 0 &&
                             totalHostDevices > 0 &&
                             hostDeviceSequenceNumber > 0 &&
-                            syncMode > 0);
+                            syncMode > 0 &&
+                            !switchSpeedRate.Equals(SwitchSpeed.None));
             }
         }
 
@@ -32,47 +33,26 @@ namespace KamelsConfig
         static readonly string settingsPath = Path.Combine(Directory.GetCurrentDirectory(), "settings");
 
         static (bool introPrinted, int step) setupProgress;
+
+        public enum SwitchSpeed
+        {
+            None = 0,
+            Shortest = 10,
+            Shorter = 100,
+            Short = 250,
+            Normal = 500,
+            Long = 1000,
+        }
+
+        const SwitchSpeed defaultSwitchSpeed = SwitchSpeed.Shorter;
         static void Main()
         {
             ParseSettings();
             DeviceSettingsCheck();
             SequenceSettingsCheck();
             SyncModeSettingCheck();
+            SwitchSpeedCheck();
             SetupInstructions();
-        }
-
-        static void SingleRunSwitch()
-        {
-
-            DeviceInfo mouseInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
-                            .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                            .First();
-
-            DeviceInfo keyboardInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
-                            .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                            .First();
-
-            if (mouseInfo is null || keyboardInfo is null) return;
-
-            int nextDeviceNumber = SettingsHolder.hostDeviceSequenceNumber.Equals(SettingsHolder.totalHostDevices) ? 0 : SettingsHolder.hostDeviceSequenceNumber;
-
-            byte[] mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1b })
-                                        .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                        .Concat(new byte[] { 0x00, 0x00 }).ToArray();
-
-            byte[] keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x1e })
-                                        .Concat(BitConverter.GetBytes(nextDeviceNumber))
-                                        .Concat(new byte[] { 0x00, 0x00 }).ToArray();
-
-            using (Device deviceLink = mouseInfo.ConnectToDevice())
-            {
-                deviceLink.Write(mouseSwitchCommand);
-            };
-
-            using (Device deviceLink = keyboardInfo.ConnectToDevice())
-            {
-                deviceLink.Write(keyboardSwitchCommand);
-            };
         }
         static void DeviceSettingsCheck()
         {
@@ -185,6 +165,68 @@ namespace KamelsConfig
             };
         }
 
+        static void SwitchSpeedCheck()
+        {
+            if (SettingsHolder.switchSpeedRate.Equals(SwitchSpeed.None) && SettingsHolder.syncMode>1)
+            {
+                DeviceInfo? mouseDeviceInfo = Hid.Enumerate(logiVendorID, SettingsHolder.mouseDevice)
+                                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                                        .FirstOrDefault();
+
+                DeviceInfo? keyboardDeviceInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
+                                        .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
+                                        .FirstOrDefault();
+
+                if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+                {
+                    if (mouseDeviceInfo.BusType.Equals(BusType.Bluetooth) || keyboardDeviceInfo.BusType.Equals(BusType.Bluetooth))
+                    {
+
+                        setupProgress.step += 1;
+
+                        if (!setupProgress.introPrinted)
+                        {
+                            PrintIntro();
+                        };
+
+                        List<SwitchSpeed> speedList = new List<SwitchSpeed>
+                        {
+                            defaultSwitchSpeed
+                        };
+
+                        speedList.AddRange(((SwitchSpeed[])Enum.GetValues(typeof(SwitchSpeed)))
+                                    .Where(x => !(x is defaultSwitchSpeed || x is SwitchSpeed.None)));
+
+                        StringBuilder speedListSB = new StringBuilder();
+
+                        for(int i=0; i<speedList.Count; i++)
+                        {
+                            speedListSB.Append($"\t{i+1}. {speedList[i]} - less than {(double)speedList[i] / 1000} seconds{(i == 0 ? " (DEFAULT)" : string.Empty)}\r\n");
+                        };
+
+                        int selection = RequestNumberEntry($"\r\n{setupProgress.step}." +
+                                            $"Due to the nature of how Bluetooth connects to your computer, the background worker checks periodically if a connection has become active.\r\n\r\n" +
+                                            $"A shorter check period will consume more resources (mainly CPU). On modern computers, you can safely use the default \"{defaultSwitchSpeed}\" without significant impact.\r\n\r\n" +
+                                            $"You can use a longer period if you will not rapidly switch between devices.\r\n\r\n" +
+                                            $"Please select the check period mode you would like to use:\r\n\r\n" +
+                                                                                                speedListSB.ToString() +
+                                                                                                $"\r\n... type in the number of your choice, and press 'Enter': ", 1, 5);
+                        SettingsHolder.switchSpeedRate = speedList[selection - 1];
+                    }
+                    else
+                    {
+                        SettingsHolder.switchSpeedRate = SwitchSpeed.Shorter;
+                    };
+                }
+                else
+                {
+                    SettingsHolder.switchSpeedRate = SwitchSpeed.Shorter;
+                };
+
+                GenerateSettingsFile();
+            };
+        }
+
         static void SetupInstructions()
         {
             if (setupProgress.introPrinted)
@@ -239,8 +281,11 @@ namespace KamelsConfig
 
                 if (paramLines is not null)
                 {
-                    foreach (PropertyInfo property in typeof(SettingsHolder).GetProperties())
+                    PropertyInfo[] propertiesCollection = typeof(SettingsHolder).GetProperties();
+                    int propertiesCount = propertiesCollection.Count();
+                    for (int i = 0; i<propertiesCount; i++)
                     {
+                        PropertyInfo property = propertiesCollection[i];
                         if (paramLines.ContainsKey(property.Name))
                         {
                             if (property.PropertyType == typeof(ushort))
@@ -250,10 +295,16 @@ namespace KamelsConfig
                                 {
                                     property.SetValue(null, conversion);
                                 };
+                                continue;
                             }
-                            else
+                            if(property.PropertyType == typeof(SwitchSpeed))
                             {
-                                property.SetValue(null, paramLines[property.Name]);
+                                object? conversion;
+                                if(Enum.TryParse(typeof(SwitchSpeed), paramLines[property.Name], out conversion))
+                                {
+                                    property.SetValue(null, conversion);
+                                };
+                                continue;
                             };
                         };
                     };
@@ -267,8 +318,12 @@ namespace KamelsConfig
                 using (StreamWriter settingsWriter = new StreamWriter(settingsStream))
                 {
                     settingsWriter.WriteLine("//This is a configuration file that keeps your settings. Please edit with care.\r\n");
-                    foreach (PropertyInfo property in typeof(SettingsHolder).GetProperties())
+
+                    PropertyInfo[] propertiesCollection = typeof(SettingsHolder).GetProperties();
+                    int propertiesCount = propertiesCollection.Count();
+                    for (int i = 0; i < propertiesCount; i++)
                     {
+                        PropertyInfo property = propertiesCollection[i];
                         settingsWriter.WriteLine($"{property.Name}={property.GetValue(null)}");
                     };
                 };
@@ -316,12 +371,12 @@ namespace KamelsConfig
         static void PrintIntro()
         {
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"KAMELS - Keyboard and Mouse Easy Logitech Switch, version {Assembly.GetExecutingAssembly().GetName().Version}\r\n");
+            Console.WriteLine($"KAMELS - Keyboard and Mouse Enumerative Logitech Switch, version {Assembly.GetExecutingAssembly().GetName().Version}\r\n");
 
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine($"This is a small program to help your multidevice Logitech peripherals in sync.\r\n\r\n" + "" +
+            Console.WriteLine($"This is a small program to help keep your multidevice Logitech mouse and keyboard in sync.\r\n\r\n" + "" +
                                 "This software is not affiliated in any way with Logitech. Please use at your own risk.\r\n\r\n" +
-                                "Some setup is necessary to get you going, so please follow the instructions below to get everything ready.");
+                                "Some setup is necessary to get you going, so please follow the instructions below to get started.");
 
             setupProgress.introPrinted = true;
         }

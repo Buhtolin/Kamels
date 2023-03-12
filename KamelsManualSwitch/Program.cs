@@ -1,5 +1,4 @@
 ﻿using HidApi;
-using System.Reflection;
 using KamelsConfig;
 using System.Diagnostics;
 
@@ -10,6 +9,10 @@ class Program
     static byte[]? mouseSwitchCommand { get; set; }
     static byte[]? keyboardSwitchCommand { get; set; }
     static int nextDeviceNumber { get; set; }
+    static bool mouseConnected { get; set;}
+    static bool keyboardConnected { get; set;}
+
+    static int loopDelayTime { get; set; }
     static void Main()
     {
         Config.ParseSettings();
@@ -20,9 +23,14 @@ class Program
             return;
         };
 
+        loopDelayTime = (int)Config.SettingsHolder.switchSpeedRate;
+
         Hid.Init();
 
-        LoadSettings();
+        if (!LoadSettings())
+        {
+            return;
+        };
 
         switch (Config.SettingsHolder.syncMode)
         {
@@ -31,19 +39,21 @@ class Program
                 break;
 
             case 2:
+                Task ConnectionStatusWorkerKeyboard = Task.Run(ConnectionStatusUpdate);
                 Task KeyboardWorker = Task.Run(ListenerWorkerKeyboard);
                 KeyboardWorker.Wait();
                 break;
 
             case 3:
+                Task ConnectionStatusWorkerMouse = Task.Run(ConnectionStatusUpdate);
                 Task MouseWorker = Task.Run(ListenerWorkerMouse);
                 MouseWorker.Wait();
                 break;
 
             case 4:
+                Task ConnectionStatusWorkerHybrid = Task.Run(ConnectionStatusUpdate);
                 Task MouseCoworker = Task.Run(ListenerWorkerMouse);
                 Task KeyboardCoworker = Task.Run(ListenerWorkerKeyboard);
-                //MouseCoworker.Wait();
                 KeyboardCoworker.Wait();
                 break;
         };
@@ -52,19 +62,22 @@ class Program
 
     }
 
-    static void LoadSettings()
+    static bool LoadSettings()
     {
         mouseDeviceInfo = Hid.Enumerate(Config.logiVendorID, Config.SettingsHolder.mouseDevice)
                                 .Where(x => Array.IndexOf(Config.logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                                .First();
+                                .FirstOrDefault();
 
         keyboardDeviceInfo = Hid.Enumerate(Config.logiVendorID, Config.SettingsHolder.keyboardDevice)
                                 .Where(x => Array.IndexOf(Config.logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
-                                .First();
+                                .FirstOrDefault();
 
-        if (mouseDeviceInfo is null || keyboardDeviceInfo is null) return;
+        if (mouseDeviceInfo is null || keyboardDeviceInfo is null) return false;
 
         nextDeviceNumber = Config.SettingsHolder.hostDeviceSequenceNumber.Equals(Config.SettingsHolder.totalHostDevices) ? 0 : Config.SettingsHolder.hostDeviceSequenceNumber;
+
+        mouseConnected = true;
+        keyboardConnected = true;
 
         if (mouseDeviceInfo.BusType.Equals(BusType.Usb))
         {
@@ -88,6 +101,7 @@ class Program
                                     .Concat(BitConverter.GetBytes(nextDeviceNumber))
                                     .ToArray();
         };
+        return true;
     }
 
     static void ManualSwitch()
@@ -103,120 +117,179 @@ class Program
         };
     }
 
-    static void ListenerWorkerMouse()
+    static async Task ListenerWorkerMouse()
     {
         if(mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
         {
             if (mouseDeviceInfo.BusType.Equals(BusType.Usb))
             {
-                byte[] mouseSwitchOff = { 0x10, 0x02, 0x41, 0x10, 0x42, 0x30, 0xB0 };
-
-                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
-                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
-                {
-                    while (true)
-                    {
-                        ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
-                        if (readResult.SequenceEqual(mouseSwitchOff))
-                        {
-                            SendCommand(keyboardSwitchCommand, keyboardDevice);
-                        };
-                    };
-                };
+                MouseUsbListenerAction();
             };
 
             if (mouseDeviceInfo.BusType.Equals(BusType.Bluetooth))
             {
-                bool connected = true;
-                //byte[] mouseSwitchOn = { 0x10, 0x02, 0x41, 0x10, 0x02, 0x30, 0xB0 };
                 while (true)
                 {
-                    try
+                    MouseBluetoothListenerAction();
+                    await Task.Delay(loopDelayTime);
+                };
+            };
+        };
+    }
+
+    static void MouseUsbListenerAction()
+    {
+        if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            byte[] mouseSwitchOff = { 0x10, 0x02, 0x41, 0x10, 0x42, 0x30, 0xB0 };
+
+            using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+            {
+                while (true)
+                {
+                    ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
+                    if (readResult.SequenceEqual(mouseSwitchOff))
                     {
-                        using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                        if (keyboardConnected)
                         {
-                            if (!connected)
+                            using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
                             {
-                                connected = true;
+                                SendCommand(keyboardSwitchCommand, keyboardDevice);
                             };
-                            ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
-                        };
-                    }
-                    catch
-                    {
-                        if (connected)
-                        {
-                            try
+                            if (keyboardDeviceInfo.BusType.Equals(BusType.Bluetooth))
                             {
-                                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
-                                {
-                                    SendCommand(keyboardSwitchCommand, keyboardDevice);
-                                };
-                            }
-                            catch { };
+                                keyboardConnected = false;
+                            };
                         };
-                        connected = false;
                     };
                 };
             };
         };
     }
 
-    static void ListenerWorkerKeyboard()
+    static void MouseBluetoothListenerAction()
+    {
+        if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            try
+            {
+                if (mouseConnected)
+                {
+                    using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                    {
+                        ReadOnlySpan<byte> readResult = mouseDevice.Read(7);
+                    };
+                };
+            }
+            catch
+            {
+                if (mouseConnected)
+                {
+                    try
+                    {
+                        if (keyboardConnected)
+                        {
+                            using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                            {
+                                SendCommand(keyboardSwitchCommand, keyboardDevice);
+                                if (keyboardDeviceInfo.BusType.Equals(BusType.Bluetooth))
+                                {
+                                    keyboardConnected = false;
+                                };
+                            };
+                        };
+                    }
+                    catch { };
+                };
+                mouseConnected = false;
+            };
+        };
+    }
+
+    static async Task ListenerWorkerKeyboard()
     {
         if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
         {
             if (keyboardDeviceInfo.BusType.Equals(BusType.Usb))
             {
-                byte[] keyboardSwitchOff = { 0x10, 0x01, 0x41, 0x10, 0x41, 0x65, 0xB3 };
-
-                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
-                using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
-                {
-                    while (true)
-                    {
-                        ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
-                        if (readResult.SequenceEqual(keyboardSwitchOff))
-                        {
-                            SendCommand(mouseSwitchCommand, mouseDevice);
-                        };
-                    };
-                };
+                KeyboardUsbListenerAction();
             };
 
             if (keyboardDeviceInfo.BusType.Equals(BusType.Bluetooth))
             {
-                bool connected = true;
-                //byte[] mouseSwitchOn = { 0x10, 0x02, 0x41, 0x10, 0x02, 0x30, 0xB0 };
                 while (true)
+                {
+                    KeyboardBluetoothListenerAction();
+                    await Task.Delay(loopDelayTime);
+                };
+            };
+        };
+    }
+
+    static void KeyboardUsbListenerAction()
+    {
+        if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            byte[] keyboardSwitchOff = { 0x10, 0x01, 0x41, 0x10, 0x41, 0x65, 0xB3 };
+            using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+            {
+                while (true)
+                {
+                    ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
+                    if (readResult.SequenceEqual(keyboardSwitchOff))
+                    {
+                        if (mouseConnected)
+                        {
+                            using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
+                            {
+                                SendCommand(mouseSwitchCommand, mouseDevice);
+                            };
+                            if (mouseDeviceInfo.BusType.Equals(BusType.Bluetooth))
+                            {
+                                mouseConnected = false;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    }
+
+    static void KeyboardBluetoothListenerAction()
+    {
+        if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            try
+            {
+                if (keyboardConnected)
+                {
+                    using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                    {
+                        ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
+                    };
+                };
+            }
+            catch
+            {
+                if (keyboardConnected)
                 {
                     try
                     {
-                        using (Device keyboardDevice = keyboardDeviceInfo.ConnectToDevice())
+                        using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
                         {
-                            if (!connected)
+                            if (mouseConnected)
                             {
-                                connected = true;
+                                SendCommand(mouseSwitchCommand, mouseDevice);
+                                if (mouseDeviceInfo.BusType.Equals(BusType.Bluetooth))
+                                {
+                                    mouseConnected = false;
+                                };
                             };
-                            ReadOnlySpan<byte> readResult = keyboardDevice.Read(7);
                         };
                     }
-                    catch
-                    {
-                        if (connected)
-                        {
-                            try
-                            {
-                                using (Device mouseDevice = mouseDeviceInfo.ConnectToDevice())
-                                {
-                                    SendCommand(mouseSwitchCommand, mouseDevice);
-                                };
-                            }
-                            catch { };
-                        };
-                        connected = false;
-                    };
+                    catch { };
                 };
+                keyboardConnected = false;
             };
         };
     }
@@ -240,5 +313,38 @@ class Program
         procStartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
         procStartInfo.FileName = "KamelsConfig.exe";
         Process.Start(procStartInfo);
+    }
+
+    static async Task ConnectionStatusUpdate()
+    {
+        if(mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
+        {
+            while (true)
+            {
+                if (!(mouseConnected && keyboardConnected))
+                {
+                    try
+                    {
+                        if (!mouseConnected)
+                        {
+                            if (Hid.Enumerate(mouseDeviceInfo.VendorId, mouseDeviceInfo.ProductId).Any(x => x.Path == mouseDeviceInfo.Path))
+                            {
+                                mouseConnected = true;
+                            };
+                        };
+                        if (!keyboardConnected)
+                        {
+                            if(Hid.Enumerate(keyboardDeviceInfo.VendorId, keyboardDeviceInfo.ProductId).Any(x => x.Path == keyboardDeviceInfo.Path))
+                            {
+                                keyboardConnected = true;
+                            };
+                        };
+                    }
+                    catch { };
+                };
+
+                await Task.Delay(loopDelayTime);
+            };
+        };
     }
 }
