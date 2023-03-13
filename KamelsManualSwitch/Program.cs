@@ -72,7 +72,19 @@ class Program
                                 .Where(x => Array.IndexOf(Config.logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
                                 .FirstOrDefault();
 
-        if (mouseDeviceInfo is null || keyboardDeviceInfo is null) return false;
+        if (mouseDeviceInfo is null || keyboardDeviceInfo is null)
+        {
+            Config.ParsePersistedDevicesFile();
+            if(Config.PersistedDevices.mouseDevice is null || Config.PersistedDevices.keyboardDevice is null)
+            {
+                return false;
+            }
+            else
+            {
+                mouseDeviceInfo = Config.PersistedDevices.mouseDevice;
+                keyboardDeviceInfo = Config.PersistedDevices.keyboardDevice;
+            };
+        };
 
         nextDeviceNumber = Config.SettingsHolder.hostDeviceSequenceNumber.Equals(Config.SettingsHolder.totalHostDevices) ? 0 : Config.SettingsHolder.hostDeviceSequenceNumber;
 

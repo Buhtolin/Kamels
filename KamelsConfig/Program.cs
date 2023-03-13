@@ -1,6 +1,9 @@
 ﻿using HidApi;
 using System.Text;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text.Json;
+using static KamelsConfig.Config;
 
 namespace KamelsConfig
 {
@@ -25,12 +28,19 @@ namespace KamelsConfig
                             !switchSpeedRate.Equals(SwitchSpeed.None));
             }
         }
+        public static class PersistedDevices
+        {
+            public static DeviceInfo? mouseDevice { get; set; }
+            public static DeviceInfo? keyboardDevice { get; set; }
+        };
 
         public static readonly (ushort UsagePage, ushort Usage)[] logiInterfaceIdentifiers = { (65280, 1), //Logibolt
                                                                                     (65347, 514) //Bluetooth
                                                                                   };
 
         static readonly string settingsPath = Path.Combine(Directory.GetCurrentDirectory(), "settings");
+
+        static readonly string persistedDevicesPath = Path.Combine(Directory.GetCurrentDirectory(), "persist");
 
         static (bool introPrinted, int step) setupProgress;
 
@@ -89,27 +99,27 @@ namespace KamelsConfig
 
                 List<DeviceInfo> devicesHolder = ListLogitechHIDDeviceControllers();
 
-                switch (devicesHolder.Count)
+                if (devicesHolder.Count > 0)
                 {
-                    case 1:
+                    int deviceIndex = 0;
 
-                        property.SetValue(null, devicesHolder[0].ProductId);
-                        break;
+                    if (devicesHolder.Count == 1)
+                    {
+                        deviceIndex = 0;
+                    }
+                    else
+                    {
+                        deviceIndex = RequestNumberEntry($"Please type a number (1-{devicesHolder.Count}) and press 'Enter': ", 1, devicesHolder.Count) - 1;
+                    };
 
-                    case > 1:
+                    property.SetValue(null, devicesHolder[deviceIndex].ProductId);
 
-                        int deviceNumber = RequestNumberEntry($"Please type a number (1-{devicesHolder.Count}) and press 'Enter': ", 1, devicesHolder.Count) - 1;
-                        property.SetValue(null, devicesHolder[deviceNumber].ProductId);
-                        break;
+                    typeof(PersistedDevices).GetProperty(property.Name)?.SetValue(null, devicesHolder[deviceIndex]);
 
-                    default:
-
-                        Console.WriteLine("No Logitech intefaces detected!");
-                        Console.Read();
-                        return;
                 };
-                GenerateSettingsFile();
+                GeneratePersistedDevicesFile();
             };
+            GenerateSettingsFile();
         }
 
         static void SequenceSettingsCheck()
@@ -176,6 +186,8 @@ namespace KamelsConfig
                 DeviceInfo? keyboardDeviceInfo = Hid.Enumerate(logiVendorID, SettingsHolder.keyboardDevice)
                                         .Where(x => Array.IndexOf(logiInterfaceIdentifiers, (x.UsagePage, x.Usage)) > -1)
                                         .FirstOrDefault();
+
+                string lain = JsonSerializer.Serialize(mouseDeviceInfo);
 
                 if (mouseDeviceInfo is not null && keyboardDeviceInfo is not null)
                 {
@@ -328,7 +340,52 @@ namespace KamelsConfig
                     };
                 };
             };
-
+        }
+        static void GeneratePersistedDevicesFile()
+        {
+            using (FileStream persistedDevicesStream = new FileStream(persistedDevicesPath, FileMode.Create))
+            {
+                using (StreamWriter persistedDevicesWriter = new StreamWriter(persistedDevicesStream))
+                {
+                    string mouseInfoSerialized = JsonSerializer.Serialize(PersistedDevices.mouseDevice);
+                    string keyboardInfoSerialized = JsonSerializer.Serialize(PersistedDevices.keyboardDevice);
+                    persistedDevicesWriter.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(mouseInfoSerialized)));
+                    persistedDevicesWriter.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(keyboardInfoSerialized)));
+                };
+            };
+        }
+        public static void ParsePersistedDevicesFile()
+        {
+            if (!File.Exists(persistedDevicesPath))
+            {
+                return;
+            }
+            else
+            {
+                using(FileStream persistedDevicesStream = new FileStream(persistedDevicesPath, FileMode.Open))
+                {
+                    using (StreamReader? persistedDevicesReader = new StreamReader(persistedDevicesStream))
+                    {
+                        try
+                        {
+                            string? mouseSerializedString = persistedDevicesReader.ReadLine();
+                            string? keyboardSerializedString = persistedDevicesReader.ReadLine();
+                            if(mouseSerializedString != null)
+                            {
+                                PersistedDevices.mouseDevice = JsonSerializer.Deserialize<DeviceInfo?>(Convert.FromBase64String(mouseSerializedString));
+                            };
+                            if (keyboardSerializedString != null)
+                            {
+                                PersistedDevices.keyboardDevice = JsonSerializer.Deserialize<DeviceInfo?>(Convert.FromBase64String(keyboardSerializedString));
+                            };
+                        }
+                        catch
+                        {
+                            return;
+                        };
+                    };
+                };
+            };
         }
 
         static List<DeviceInfo> ListLogitechHIDDeviceControllers()
