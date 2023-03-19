@@ -1,4 +1,0 @@
-D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.dll
-D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.deps.json
-D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\KamelsConfig.pdb
-D:\Mruv\Buhtolin\kamels\Builds\Release\net6.0\publish\HidApi.Net.dll

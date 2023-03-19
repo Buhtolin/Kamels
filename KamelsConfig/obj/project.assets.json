@@ -39,11 +39,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsConfig\\KamelsConfig.csproj",
+      "projectUniqueName": "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\KamelsConfig.csproj",
       "projectName": "KamelsConfig",
-      "projectPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsConfig\\KamelsConfig.csproj",
+      "projectPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\KamelsConfig.csproj",
       "packagesPath": "C:\\Users\\Mruvka\\.nuget\\packages\\",
-      "outputPath": "D:\\Mruv\\Buhtolin\\Kamels\\KamelsConfig\\obj\\",
+      "outputPath": "D:\\Mruv\\Buhtolin\\kamels\\KamelsConfig\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Mruvka\\AppData\\Roaming\\NuGet\\NuGet.Config",
