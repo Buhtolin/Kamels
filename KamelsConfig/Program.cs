@@ -1,9 +1,7 @@
 ﻿using HidApi;
 using System.Text;
 using System.Reflection;
-using System.Runtime.Serialization;
 using System.Text.Json;
-using static KamelsConfig.Config;
 
 namespace KamelsConfig
 {
