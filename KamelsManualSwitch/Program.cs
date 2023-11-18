@@ -93,22 +93,26 @@ class Program
 
         if (mouseDeviceInfo.BusType.Equals(BusType.Usb))
         {
+            //Logitech POP Mouse Command - Logi Bolt Dongle Command
             mouseSwitchCommand = (new byte[] { 0x10, 0x02, 0x0a, 0x1e })
                                     .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
         }
         else
         {
+            //Logitech POP Mouse Command - Bluetooth Command
             mouseSwitchCommand = (new byte[] { 0x11, 0x00, 0x0a, 0x1c })
                                     .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
         };
 
         if (keyboardDeviceInfo.BusType.Equals(BusType.Usb))
         {
+            //Logitech POP Keyboard Command - Logi Bolt Dongle Command
             keyboardSwitchCommand = (new byte[] { 0x10, 0x01, 0x09, 0x16 })
                                     .Concat(BitConverter.GetBytes(nextDeviceNumber)).ToArray();
         }
         else
         {
+            //Logitech POP Keyboard Command - Bluetooth Command
             keyboardSwitchCommand = (new byte[] { 0x11, 0x00, 0x09, 0x1c })
                                     .Concat(BitConverter.GetBytes(nextDeviceNumber))
                                     .ToArray();
