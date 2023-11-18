@@ -4,6 +4,8 @@ using System.Diagnostics;
 
 namespace KamelsSwitch
 {
+
+    //Hardcoded HID commands for Logitech POP Keyboard and Logitech POP Mouse
     class Program
     {
         static DeviceInfo? mouseDeviceInfo { get; set; }

@@ -1,109 +1,108 @@
 # KamelsSwitch Program Documentation
 
-The `Program.cs` file is part of a project named `KamelsSwitch` that appears to manage switching between different input devices, likely keyboards and mice. Below you will find a detailed breakdown of the classes, methods, and their functionalities.
+KamelsSwitch's `Program.cs` is a C# console application designed to manage the switching of Logitech POP Keyboard and Mouse between multiple host devices. It uses the HID (Human Interface Device) protocol to communicate with the devices and allows users to switch between connected hosts manually or automatically based on the current connection status.
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Main Components](#main-components)
+- [Methods](#methods)
+- [Supporting Tools](#supporting-tools)
+
+---
 
 ## Overview
 
-`KamelsSwitch` is a console application written in C# that utilizes the `HidApi` and `KamelsConfig` libraries. The application is designed for managing and switching between different Logitech input devices (mouse and keyboard) connected via USB or Bluetooth.
+The program interacts with the Logitech POP Keyboard and Mouse using specific HID commands to switch the active connection to different host devices. It supports multiple synchronization modes, which can be set by the user, to determine how the devices should switch between hosts.
 
-## Classes and Methods
+---
 
-### Program
+## Main Components
 
-The `Program` class contains the entry point for the application and includes several static members for managing the configuration and the device switching process.
+- **Initial Configuration**: Upon startup, the application checks if a setup is needed and initiates the `StartConfigTool` if required.
+- **HID Initialization**: It initializes the HID API to communicate with the devices.
+- **Settings Loading**: The program loads the necessary settings and determines the state of the mouse and keyboard devices.
+- **Switching Modes**: Based on the user's choice, the application can switch devices manually or automatically monitor the connection status and switch when needed.
 
-#### Properties
+---
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `mouseDeviceInfo` | DeviceInfo? | Holds information about the connected mouse device. |
-| `keyboardDeviceInfo` | DeviceInfo? | Holds information about the connected keyboard device. |
-| `mouseSwitchCommand` | byte[]? | Stores the command to switch the mouse device. |
-| `keyboardSwitchCommand` | byte[]? | Stores the command to switch the keyboard device. |
-| `nextDeviceNumber` | int | The sequence number of the next host device to switch to. |
-| `mouseConnected` | bool | Indicates whether the mouse is connected. |
-| `keyboardConnected` | bool | Indicates whether the keyboard is connected. |
-| `loopDelayTime` | int | The delay time between each loop iteration in asynchronous tasks. |
+## Methods
 
-#### Main Method
+### Main Method
 
 ```csharp
 static void Main()
 ```
+This is the entry point of the application, which initializes the configuration, HID API, and starts the listener workers based on the selected sync mode.
 
-This is the entry point of the application. It performs the following actions:
-
-1. Parses the configuration settings.
-2. Checks if the setup is needed and starts the configuration tool if necessary.
-3. Initializes the HID library.
-4. Loads settings for mouse and keyboard devices.
-5. Depending on the synchronization mode (`syncMode`), it chooses between manual switch or sets up tasks to monitor connection status and to listen for device switch commands.
-
-#### LoadSettings Method
+### Load Settings
 
 ```csharp
 static bool LoadSettings()
 ```
+Loads all required settings and prepares the switch commands for the Logitech devices.
 
-Loads settings for the mouse and keyboard devices and prepares the switch commands for each device based on the connection type (USB or Bluetooth). Returns `true` if settings load successfully, otherwise `false`.
+### Switch Methods
 
-#### ManualSwitch Method
+- **Manual Switch**: Activated by the user to switch devices manually.
+  ```csharp
+  static void ManualSwitch()
+  ```
+  
+- **Listener Workers**: Monitor device connectivity and switch when triggered.
+  ```csharp
+  static async Task ListenerWorkerMouse()
+  static async Task ListenerWorkerKeyboard()
+  ```
 
-```csharp
-static void ManualSwitch()
-```
-
-Performs a manual switch of the mouse and keyboard devices by sending the appropriate commands to each device.
-
-#### ListenerWorker Methods
-
-These methods set up asynchronous workers for listening to device events:
-
-- `static async Task ListenerWorkerMouse()`
-- `static async Task ListenerWorkerKeyboard()`
-
-Each worker listens for specific switch-off commands and sends a switch command to the opposite device type.
-
-#### USB and Bluetooth Listener Actions
-
-For each device type (mouse and keyboard), there are two methods to handle listening actions depending on whether the device is connected via USB or Bluetooth:
-
-- `static void MouseUsbListenerAction()`
-- `static void MouseBluetoothListenerAction()`
-- `static void KeyboardUsbListenerAction()`
-- `static void KeyboardBluetoothListenerAction()`
-
-#### SendCommand Method
-
-```csharp
-static void SendCommand(byte[]? command, Device? deviceInput)
-```
-
-Sends a command to the specified device.
-
-#### StartConfigTool Method
-
-```csharp
-static void StartConfigTool()
-```
-
-Starts an external configuration tool named `KamelsConfig.exe`.
-
-#### ConnectionStatusUpdate Method
+### Connection Status Update
 
 ```csharp
 static async Task ConnectionStatusUpdate()
 ```
+Continuously checks the connection status of the devices and updates their connected state.
 
-Asynchronously updates the connection status of the mouse and keyboard devices.
+### Send Command
 
-## Usage
+```csharp
+static void SendCommand(byte[]? command, Device? deviceInput)
+```
+Sends a specified HID command to a connected Logitech device.
 
-The application is designed to run in the background and handle device switching automatically based on pre-configured settings. The synchronization mode dictates whether the application will handle switches manually or listen for device events to perform automatic switching.
+### Start Config Tool
+
+```csharp
+static void StartConfigTool()
+```
+Runs the configuration tool if setup is required.
+
+---
+
+## Supporting Tools
+
+- **HidApi**: A library that provides the functionality to interact with HID devices.
+- **KamelsConfig**: A configuration tool used for initial setup and settings management.
+
+---
+
+## Synchronization Modes
+
+| Mode | Description |
+| ---- | ----------- |
+| 1    | Manual Switch |
+| 2    | Automatic switch for Keyboard (USB) |
+| 3    | Automatic switch for Mouse (USB or Bluetooth) |
+| 4    | Automatic switch for both Mouse and Keyboard |
+
+The sync mode determines how the application listens to the devices and decides when to send the switch command.
+
+---
 
 ## Conclusion
 
-The `Program.cs` file outlines a console application that facilitates switching between Logitech input devices. It includes complex logic to monitor device events and manage connections, accommodating both USB and Bluetooth connectivity. The code is organized into a single `Program` class with methods for initializing, loading settings, and handling device switches.
+The `Program.cs` in KamelsSwitch is designed to facilitate the switching of Logitech POP Keyboard and Mouse devices between multiple computers. It provides different modes of operation suitable for various user preferences and setups. Through the use of HID commands and listener workers, the application automates the process, making it convenient for users who frequently move between workstations.
 
 
 # KamelsConfig Program Documentation
