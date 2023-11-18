@@ -1,6 +1,6 @@
 # Kamels - Sync for Multidevice Mouse and Keyboard
 
-Kamels (**K**eyboard **A**nd **M**ouse **E**numerative **L**ogic **S**witch) is a small, proof-of-concept solution written in C# to keep your multidevice keyboard and mouse synced to the same machine.
+Kamels (**K**eyboard **A**nd **M**ouse **E**numerative **L**ogic **S**witch) is a small, proof-of-concept solution written in C# to help keep your multidevice keyboard and mouse synced to the same machine.
 
 When working with most multidevice keyboard + mice combos, you need to physically switch the output of both devices when jumping between machines. Kamels' goal is to address this issue and make sure that you only need to switch one device, and the other device will sync automatically.
 
@@ -31,7 +31,7 @@ In order to run Kamels, you need to set it up on all the machines you intend to 
 
 ## To-Do:
 
-There is lots of polishing to be done on the code, and there are some occassional bugs with the background mode of KamelsSwitch. Having to hardcode HID byte commands is an ongoing hindrance for which I have not yet found a satisfying remedy.
+This is an unfinished project, there is lots of polishing to be done on the code, and there are some occassional bugs with the background mode of KamelsSwitch. Having to hardcode HID byte commands is an ongoing hindrance for which I have not yet found a satisfying remedy.
 
 ## DISCLAIMER!
 
