@@ -164,9 +164,9 @@ namespace KamelsConfig
 
                 SettingsHolder.syncMode = (ushort)RequestNumberEntry($"\r\n{setupProgress.step}. Please select the switch mode you would like to use:\r\n\r\n" +
                                                                                         $"\t1. Mouse follows keyboard (via sequence-toggle function bound to key press)\r\n" +
-                                                                                        $"\t2. Mouse follows keyboard\r\n" +
-                                                                                        $"\t3. Keyboard follows mouse (this program needs to run in the background)\r\n" +
-                                                                                        $"\t4. Either (this program needs to run in the background)\r\n" +
+                                                                                        $"\t2. Mouse follows keyboard (KamelsSwitch needs to run in the background)\r\n" +
+                                                                                        $"\t3. Keyboard follows mouse (KamelsSwitch needs to run in the background)\r\n" +
+                                                                                        $"\t4. Either (KamelsSwitch needs to run in the background)\r\n" +
                                                                                         $"\r\n... type in the number of your choice, and press 'Enter': ", 1, 4);
 
                 GenerateSettingsFile();
