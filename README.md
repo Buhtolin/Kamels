@@ -1,10 +1,10 @@
 # Kamels - Sync for Multidevice Mouse and Keyboard
 
-Kamels (**K**eyboard **A**nd **M**ouse **E**numerative **L**ogic **S**witch) is a small, POC solution written in C# to keep your multidevice keyboard and mouse synced to the same machine.
+Kamels (**K**eyboard **A**nd **M**ouse **E**numerative **L**ogic **S**witch) is a small, proof-of-concept solution written in C# to keep your multidevice keyboard and mouse synced to the same machine.
 
 When working with most multidevice keyboard + mice combos, you need to physically switch the output of both devices when jumping between machines. Kamels' goal is to address this issue and make sure that you only need to switch one device, and the other device will sync automatically.
 
-As of now, there are hardcoded values in the code for the Logitech POP keyboard + mouse combo. However, with small changes to the code, you can easily accomodate other device models and brands, you just need to know the correct HID command to send for each device.
+As of now, there are hardcoded values for the Logitech POP keyboard + mouse combo in the code. However, with small changes to the code, you can easily accomodate other device models and brands, you just need to know the correct HID command to send for each device.
 
 The switch between machines happens in a predefined sequence, it is always 1->2->3->...->n. You cannot jump from 1 to 4, you need to do 1 to 2 to 3 to 4. This is because the switch relies on listening for a disconnect event on one device, which triggers a switch command on the other device.
 
@@ -19,7 +19,7 @@ You can use four different modes of switching:
 | Mode | Description |
 | ---- | ----------- |
 | 1    | Mouse follows keyboard (via sequence-toggle function bound to key press) |
-| 2    | Mouse follows keyboard( KamelsSwitch needs to run in the background) |
+| 2    | Mouse follows keyboard (KamelsSwitch needs to run in the background) |
 | 3    | Keyboard follows mouse (KamelsSwitch needs to run in the background) |
 | 4    | Either (KamelsSwitch to run in the background) |
 
