@@ -9,3 +9,5 @@ KamelsConfig/obj/
 KamelsManualSwitch/Properties/
 KamelsConfig/Properties/
 /.vscode
+/KamelsConfig/KamelsConfig.csproj.user
+/KamelsManualSwitch/KamelsSwitch.csproj.user
